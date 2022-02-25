@@ -11,7 +11,6 @@
 <body>
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.12.313/build/pdf.min.js"
     integrity="sha256-cvNhFnxjvhumxRPFi723z0Tpu6ygQQLRTz9dzGZI/7o=" crossorigin="anonymous"></script>
-  <canvas id="the-canvas"></canvas>
   <script>
     // If absolute URL from the remote server is provided, configure the CORS
     // header on that server.
@@ -23,39 +22,51 @@
     // The workerSrc property shall be specified.
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.12.313/build/pdf.worker.js';
 
-    // Asynchronous download of PDF
-    var loadingTask = pdfjsLib.getDocument(url);
-    loadingTask.promise.then(function (pdf) {
-      console.log('PDF loaded');
+    var currPage = 1; //Pages are 1-based not 0-based
+    var numPages = 0;
+    var thePDF = null;
 
-      // Fetch the first page
-      var pageNumber = 1;
-      pdf.getPage(pageNumber).then(function (page) {
-        console.log('Page loaded');
+    //This is where you start
+    pdfjsLib.getDocument(url).promise.then(function (pdf) {
 
-        var scale = 1.5;
-        var viewport = page.getViewport({ scale: scale });
+      //Set PDFJS global object (so we can easily access in our page functions
+      thePDF = pdf;
 
-        // Prepare canvas using PDF page dimensions
-        var canvas = document.getElementById('the-canvas');
-        var context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+      //How many pages it has
+      numPages = pdf.numPages;
 
-        // Render PDF page into canvas context
-        var renderContext = {
-          canvasContext: context,
-          viewport: viewport
-        };
-        var renderTask = page.render(renderContext);
-        renderTask.promise.then(function () {
-          console.log('Page rendered');
-        });
-      });
-    }, function (reason) {
-      // PDF loading error
-      console.error(reason);
+      //Start with first page
+      pdf.getPage(1).then(handlePages);
     });
+
+
+    function handlePages(page) {
+      //This gives us the page's dimensions at full scale
+      var viewport = page.getViewport({ scale: 1.5 });
+
+      //We'll create a canvas for each page to draw it on
+      var canvas = document.createElement("canvas");
+      canvas.style.display = "block";
+      var context = canvas.getContext('2d');
+
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      //Draw it on the canvas
+      page.render({ canvasContext: context, viewport: viewport });
+
+      //Add it to the web page
+      document.body.appendChild(canvas);
+
+      var line = document.createElement("hr");
+      document.body.appendChild(line);
+
+      //Move to next page
+      currPage++;
+      if (thePDF !== null && currPage <= numPages) {
+        thePDF.getPage(currPage).then(handlePages);
+      }
+    }
   </script>
 </body>
 
