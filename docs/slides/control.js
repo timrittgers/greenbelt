@@ -37,14 +37,14 @@ const saveConnection = () => {
 };
 
 const makeConnection = async () => {
-    response = await fetch(`http://${getIP()}:${getPort()}/version`);
+    response = await fetch(`https://${getIP()}:${getPort()}/version`);
     json = await response.json();
     document.querySelector(".result").innerHTML = JSON.stringify(json);
     saveConnection();
 }
 
 const loadService = async (event) => {
-    response = await fetch(`http://${getIP()}:${getPort()}/v1/playlist/${event.target.dataset.playlistIndex}`);
+    response = await fetch(`https://${getIP()}:${getPort()}/v1/playlist/${event.target.dataset.playlistIndex}`);
     json = await response.json();
     document.querySelector("#serviceName").innerHTML = json.id.name;
     document.querySelector("#itemsList").innerHTML = '';
@@ -62,7 +62,7 @@ const loadService = async (event) => {
 }
 
 const loadItem = async (event) => {
-    let response = await fetch(`http://${getIP()}:${getPort()}/v1/trigger/playlist/${event.target.dataset.playlistIndex}/${event.target.dataset.itemIndex}/0`);
+    let response = await fetch(`https://${getIP()}:${getPort()}/v1/trigger/playlist/${event.target.dataset.playlistIndex}/${event.target.dataset.itemIndex}/0`);
     let status = await response.status;
     document.querySelector(".result").innerHTML = JSON.stringify(status);
     setTimeout(loadSlideIndexInfo, 500);
@@ -70,7 +70,7 @@ const loadItem = async (event) => {
 
 const loadSlideIndexInfo = async () => {
     console.log('loadSlideIndexInfo');
-    let response = await fetch(`http://${getIP()}:${getPort()}/v1/presentation/current`);
+    let response = await fetch(`https://${getIP()}:${getPort()}/v1/presentation/current`);
     let json = await response.json();
     document.querySelector(".result").innerHTML = JSON.stringify(json);
     loadSlideImages(json);
@@ -78,7 +78,7 @@ const loadSlideIndexInfo = async () => {
 
 const getSlideImage = async (myImage, presentationUuid, index) => {
     console.log('getSlideImage');
-    let response = await fetch(`http://${getIP()}:${getPort()}/v1/presentation/${presentationUuid}/thumbnail/${index}?quality=800`);
+    let response = await fetch(`https://${getIP()}:${getPort()}/v1/presentation/${presentationUuid}/thumbnail/${index}?quality=800`);
     let blob = await response.blob();
     var objectURL = URL.createObjectURL(blob);
     myImage.src = objectURL;
@@ -86,7 +86,7 @@ const getSlideImage = async (myImage, presentationUuid, index) => {
 
 const goToNext = async (event) => {
     console.log('event');
-    const result = await fetch(`http://${getIP()}:${getPort()}/v1/trigger/cue/${event.target.dataset.index}`);
+    const result = await fetch(`https://${getIP()}:${getPort()}/v1/trigger/cue/${event.target.dataset.index}`);
 }
 
 const generateSlides = async (resultJson, index) => {
@@ -122,7 +122,7 @@ const loadSlideImages = async (resultJson) => {
 // Get playlists
 const getPlaylists = async () => {
     if (getIP() != '') {
-        let response = await fetch(`http://${getIP()}:${getPort()}/v1/playlists`);
+        let response = await fetch(`https://${getIP()}:${getPort()}/v1/playlists`);
         let json = await response.json();
         playlistCallback(json);
     }
@@ -131,13 +131,13 @@ const getPlaylists = async () => {
 document.querySelector(".saveButton").addEventListener("click", saveConnection);
 document.querySelector(".connectButton").addEventListener("click", makeConnection);
 document.querySelector("#previousSlide").addEventListener("click", function() {
-    fetch(`http://${getIP()}:${getPort()}/v1/trigger/previous`);
+    fetch(`https://${getIP()}:${getPort()}/v1/trigger/previous`);
     document.querySelectorAll('.slideImage').forEach((slide) => {
         slide.classList.remove('active');
     });
 });
 document.querySelector("#nextSlide").addEventListener("click", function() {
-    fetch(`http://${getIP()}:${getPort()}/v1/trigger/next`);
+    fetch(`https://${getIP()}:${getPort()}/v1/trigger/next`);
     document.querySelectorAll('.slideImage').forEach((slide) => {
         slide.classList.remove('active');
     });
